@@ -1,5 +1,5 @@
 fn main() {
-    let calories = std::fs::read_to_string("input_data/puzzle1_elf_calories.txt").unwrap();
+    let calories = std::fs::read_to_string("input/day1.txt").unwrap();
 
     let mut current_elf_calories = 0;
     // let mut max_elf_calories: u32 = 0;
