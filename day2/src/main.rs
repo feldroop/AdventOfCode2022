@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 fn main() {
-    let games = std::fs::read_to_string("input_data/puzzle2_rps_strategy.txt").unwrap();
+    let games = std::fs::read_to_string("input/day2.txt").unwrap();
     let total_score: u32 = games
         .lines()
         // .map(|line| GameWithMove::from_str(line).unwrap())
