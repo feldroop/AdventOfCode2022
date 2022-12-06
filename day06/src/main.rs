@@ -1,4 +1,5 @@
-use std::{collections::HashSet, fs};
+use hashbag::HashBag;
+use std::fs;
 
 fn main() {
     let input = fs::read_to_string("input/day6.txt").unwrap();
@@ -7,33 +8,38 @@ fn main() {
     let ascii_byte_input = input.into_bytes();
 
     let first_start_of_packet =
-        get_index_after_first_n_distinct_consecutive_chars(&ascii_byte_input, 4);
+        index_after_first_n_consecutive_distict_chars(&ascii_byte_input, 4).unwrap();
 
     println!("Number of character processed before the first start-of-packet marker: {first_start_of_packet}");
 
     let first_start_of_message =
-        get_index_after_first_n_distinct_consecutive_chars(&ascii_byte_input, 14);
+        index_after_first_n_consecutive_distict_chars(&ascii_byte_input, 14).unwrap();
 
     println!("Number of character processed before the first start-of-message marker: {first_start_of_message}");
 }
 
-fn get_index_after_first_n_distinct_consecutive_chars(
+// ultra unnecessarily efficient implementation of this function
+fn index_after_first_n_consecutive_distict_chars(
     ascii_chars: &[u8],
     num_consecutive: usize,
-) -> usize {
-    ascii_chars
-        .windows(num_consecutive)
-        .enumerate()
-        .find_map(|(index, chars)| {
-            let char_set: HashSet<_> = chars.iter().collect();
+) -> Result<usize, String> {
+    let (first_window, after_first_window) = ascii_chars.split_at(num_consecutive);
+    let mut current_chars: HashBag<_> = first_window.iter().collect();
 
-            if char_set.len() == num_consecutive {
-                // offset of num_consecutive - 1 for the incomplete windows at the beginning
-                // plus 1 for 0-based index
-                Some(index + num_consecutive)
-            } else {
-                None
-            }
-        })
-        .expect("The input string should contain a start-of-packet marker")
+    let window_border_iter = ascii_chars.iter().zip(after_first_window.iter());
+
+    for (window_idx, (oldest_current_char, next_char)) in window_border_iter.enumerate() {
+        if current_chars.set_len() == num_consecutive {
+            // offset of num_consecutive - 1 for the incomplete windows at the beginning
+            // plus 1 for 0-based index
+            return Ok(window_idx + num_consecutive);
+        }
+
+        current_chars.remove(oldest_current_char);
+        current_chars.insert(next_char);
+    }
+
+    Err(format!(
+        "slice does not contain {num_consecutive} distinct chars"
+    ))
 }
